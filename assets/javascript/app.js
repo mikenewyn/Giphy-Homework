@@ -9,22 +9,65 @@ function newButton() {
 
 $(document).on("click", "#char-button", function() {
   var charInfo = $(this).attr("char");
-  var queryURL = "https://api.giphy.com/v1/gifs/search?q=" + charInfo + "&api_key=SsRcRExbSi0dtRlOTjRGL7zpxiCZNIPR";
+  var queryURL = "https://api.giphy.com/v1/gifs/search?q=" + charInfo + "&api_key=SsRcRExbSi0dtRlOTjRGL7zpxiCZNIPR&limit=10";
   gifPull();
   function gifPull(){
-    $("image-area").empty();
+    $('image-area').empty();
     event.preventDefault();
     $.ajax({
       url: queryURL,
       method: "GET"
-    }).then(function(response) {
+    })
+    .then(function(response) {
       console.log(response);
-      for(var i = 0; i < response.data.length; i++){
-        $("#gifs").append("<img src='" + response.data[i].images.downsized.url + "'/>");
+      var results = response.data;
+      for(var i = 0; i < results.length; i++){
+        var d = $('<div>');
+        var p = $('<p>');
+        var image = $('<img>'); 
+        d.addClass("char-area");
+        p.text("rating: " + response.data[i].rating);
+        d.append(p);
+        image.attr("src", results[i].images.fixed_height_still.url);
+        image.attr("data-still", results[i].images.fixed_height_still.url);
+        image.attr("data-animate", results[i].images.fixed_height.url);
+        image.attr("data-state", "still");
+        image.addClass("pictures");
+
+        d.append(image);
+        d.append(p);
+
+        $('#image-area').prepend(d);
+
       }
       })
   }
+
+  $(".pictures").on("click", function() {
+    var state = $(this).attr("data-state");
+
+    console.log(state);
+
+    if (state === "still") {
+        $(this).attr("src", $(this).attr("data-animate"));
+        $(this).attr("data-state", "animate");
+    }
+
+    else {
+        $(this).attr("src", $(this).attr("data-still"));
+        $(this).attr("data-state", "still");
+    }
+
+})
+
+$("#create-char").on("click", function(event) {
+  event.preventDefault();
+  var newChar = $("#new-character").val().trim();
+  topics.push(newChar);
+  newButton();
 });
+});
+
 
 newButton();
 
